@@ -31,10 +31,18 @@ define("@scom/scom-token-input/global/index.ts", ["require", "exports"], functio
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });
-define("@scom/scom-token-input/utils/index.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet"], function (require, exports, components_2, eth_wallet_1) {
+define("@scom/scom-token-input/utils/index.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-token-list"], function (require, exports, components_2, eth_wallet_1, scom_token_list_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getTokenInfo = exports.formatNumber = void 0;
+    exports.getTokenInfo = exports.formatNumber = exports.CUSTOM_TOKEN = void 0;
+    const CUSTOM_TOKEN_VALUE = 'Other Token';
+    exports.CUSTOM_TOKEN = {
+        address: CUSTOM_TOKEN_VALUE,
+        name: CUSTOM_TOKEN_VALUE,
+        symbol: CUSTOM_TOKEN_VALUE,
+        decimals: 0,
+        logoURI: scom_token_list_1.assets.fallbackUrl
+    };
     const formatNumber = (value, decimals) => {
         const minValue = '0.0000001';
         const newValue = typeof value === 'object' ? value.toString() : value;
@@ -118,7 +126,7 @@ define("@scom/scom-token-input/tokenSelect.css.ts", ["require", "exports", "@ijs
         }
     });
 });
-define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-token-list", "@scom/scom-token-input/tokenSelect.css.ts", "@scom/scom-token-input/utils/index.ts"], function (require, exports, components_4, scom_token_list_1, tokenSelect_css_1, utils_1) {
+define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstech/components", "@scom/scom-token-list", "@scom/scom-token-input/tokenSelect.css.ts", "@scom/scom-token-input/utils/index.ts"], function (require, exports, components_4, scom_token_list_2, tokenSelect_css_1, utils_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.TokenSelect = void 0;
@@ -130,6 +138,7 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
             this.currentToken = '';
             this.filterValue = '';
             this._supportValidAddress = false;
+            this._isCustomTokenShown = false;
         }
         get token() {
             return this._token;
@@ -158,6 +167,12 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
         set supportValidAddress(value) {
             this._supportValidAddress = value;
         }
+        get isCustomTokenShown() {
+            return this._isCustomTokenShown;
+        }
+        set isCustomTokenShown(value) {
+            this._isCustomTokenShown = value;
+        }
         get tokenDataListFiltered() {
             let tokenList = this.tokenList || [];
             if (tokenList.length && this.filterValue) {
@@ -170,7 +185,7 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
             return tokenList;
         }
         renderToken(token) {
-            const tokenIconPath = token.logoURI || scom_token_list_1.assets.tokenPath(token, this.chainId);
+            const tokenIconPath = token.logoURI || scom_token_list_2.assets.tokenPath(token, this.chainId);
             const isActive = this.token && (token.address === this.token.address || token.symbol === this.token.symbol);
             if (isActive)
                 this.currentToken = token.address || token.symbol;
@@ -178,7 +193,7 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
                 this.$render("i-vstack", { width: '100%' },
                     this.$render("i-hstack", { gap: '0.5rem', verticalAlignment: 'center' },
                         this.$render("i-hstack", { gap: '0.5rem', verticalAlignment: 'center' },
-                            this.$render("i-image", { width: 24, height: 24, url: tokenIconPath, fallbackUrl: scom_token_list_1.assets.fallbackUrl }),
+                            this.$render("i-image", { width: 24, height: 24, url: tokenIconPath, fallbackUrl: scom_token_list_2.assets.fallbackUrl }),
                             this.$render("i-label", { class: "token-symbol", caption: token.symbol }))))));
             this.tokenMap.set(token.address || token.symbol, tokenElm);
             return tokenElm;
@@ -198,6 +213,12 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
                 if (token) {
                     tokenList.push(token);
                 }
+            }
+            if (this.supportValidAddress && this.isCustomTokenShown) {
+                tokenList.push({
+                    chainId: this.chainId,
+                    ...utils_1.CUSTOM_TOKEN
+                });
             }
             if (tokenList.length) {
                 const tokenItems = tokenList.map((token) => this.renderToken(token));
@@ -282,9 +303,11 @@ define("@scom/scom-token-input/tokenSelect.tsx", ["require", "exports", "@ijstec
     ], TokenSelect);
     exports.TokenSelect = TokenSelect;
 });
-define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "@ijstech/eth-contract", "@scom/scom-token-input/index.css.ts", "@scom/scom-token-input/utils/index.ts", "@scom/scom-token-list", "@ijstech/eth-wallet"], function (require, exports, components_5, eth_contract_1, index_css_1, index_1, scom_token_list_2, eth_wallet_2) {
+define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "@ijstech/eth-contract", "@scom/scom-token-input/index.css.ts", "@scom/scom-token-input/utils/index.ts", "@scom/scom-token-list", "@ijstech/eth-wallet"], function (require, exports, components_5, eth_contract_1, index_css_1, index_1, scom_token_list_3, eth_wallet_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.CUSTOM_TOKEN = void 0;
+    Object.defineProperty(exports, "CUSTOM_TOKEN", { enumerable: true, get: function () { return index_1.CUSTOM_TOKEN; } });
     const Theme = components_5.Styles.Theme.ThemeVars;
     const defaultTokenProps = {
         id: 'btnToken',
@@ -317,6 +340,7 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             this._tokenDataListProp = [];
             this._withoutConnected = false;
             this._supportValidAddress = false;
+            this._isCustomTokenShown = false;
             this.sortToken = (a, b, asc) => {
                 if (a.symbol.toLowerCase() < b.symbol.toLowerCase()) {
                     return -1;
@@ -364,8 +388,8 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
         get tokenListByChainId() {
             let list = [];
             const propList = this.tokenDataListProp.filter(f => !f.chainId || f.chainId === this.chainId);
-            const nativeToken = scom_token_list_2.ChainNativeTokenByChainId[this.chainId];
-            const tokens = scom_token_list_2.DefaultERC20Tokens[this.chainId];
+            const nativeToken = scom_token_list_3.ChainNativeTokenByChainId[this.chainId];
+            const tokens = scom_token_list_3.DefaultERC20Tokens[this.chainId];
             for (const token of propList) {
                 const tokenAddress = token.address?.toLowerCase();
                 if (!tokenAddress || tokenAddress === nativeToken?.symbol?.toLowerCase()) {
@@ -381,16 +405,16 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             return list;
         }
         get tokenDataList() {
-            let tokenList = this.tokenListByChainId?.length ? this.tokenListByChainId : scom_token_list_2.tokenStore.getTokenList(this.chainId);
+            let tokenList = this.tokenListByChainId?.length ? this.tokenListByChainId : scom_token_list_3.tokenStore.getTokenList(this.chainId);
             if (this.tokenDataListProp && this.tokenDataListProp.length) {
                 tokenList = this.tokenDataListProp;
             }
             if (!this.tokenBalancesMap || !Object.keys(this.tokenBalancesMap).length) {
-                this.tokenBalancesMap = scom_token_list_2.tokenStore.getTokenBalancesByChainId(this._chainId) || {};
+                this.tokenBalancesMap = scom_token_list_3.tokenStore.getTokenBalancesByChainId(this._chainId) || {};
             }
             return tokenList.map((token) => {
                 const tokenObject = { ...token };
-                const nativeToken = scom_token_list_2.ChainNativeTokenByChainId[this.chainId];
+                const nativeToken = scom_token_list_3.ChainNativeTokenByChainId[this.chainId];
                 if (nativeToken?.symbol && token.symbol === nativeToken.symbol) {
                     Object.assign(tokenObject, { isNative: true });
                 }
@@ -467,11 +491,14 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             }
             const tokenAddress = value.toLowerCase();
             let tokenObj = null;
-            if (tokenAddress.startsWith('0x') && tokenAddress !== eth_contract_1.nullAddress) {
-                tokenObj = scom_token_list_2.DefaultERC20Tokens[this.chainId]?.find(v => v.address?.toLowerCase() === tokenAddress);
+            if (tokenAddress === index_1.CUSTOM_TOKEN.address.toLowerCase()) {
+                tokenObj = index_1.CUSTOM_TOKEN;
+            }
+            else if (tokenAddress.startsWith('0x') && tokenAddress !== eth_contract_1.nullAddress) {
+                tokenObj = scom_token_list_3.DefaultERC20Tokens[this.chainId]?.find(v => v.address?.toLowerCase() === tokenAddress);
             }
             else {
-                const nativeToken = scom_token_list_2.ChainNativeTokenByChainId[this.chainId];
+                const nativeToken = scom_token_list_3.ChainNativeTokenByChainId[this.chainId];
                 tokenObj = (tokenAddress === eth_contract_1.nullAddress || nativeToken?.symbol?.toLowerCase() === tokenAddress) ? nativeToken : null;
             }
             this.token = tokenObj;
@@ -577,6 +604,14 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             if (this.cbToken)
                 this.cbToken.supportValidAddress = value;
         }
+        get isCustomTokenShown() {
+            return this._isCustomTokenShown;
+        }
+        set isCustomTokenShown(value) {
+            this._isCustomTokenShown = value;
+            if (this.cbToken)
+                this.cbToken.isCustomTokenShown = value;
+        }
         get amount() {
             return this.inputAmount.value;
         }
@@ -635,7 +670,7 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             this.btnToken.onClick = this.onButtonClicked;
         }
         getBalance(token) {
-            let tokenBalances = scom_token_list_2.tokenStore?.getTokenBalancesByChainId(this._chainId);
+            let tokenBalances = scom_token_list_3.tokenStore?.getTokenBalancesByChainId(this._chainId);
             if (token && tokenBalances && Object.keys(tokenBalances).length) {
                 const address = (token.address || '').toLowerCase();
                 let balance = address ? (tokenBalances[address] ?? (token.balance || 0)) : (tokenBalances[token.symbol] || 0);
@@ -744,10 +779,10 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
                 token = (this.tokenDataList || []).find((v) => (v.address && v.address == this.token?.address) ||
                     v.symbol == this.token?.symbol);
             if (token) {
-                const tokenIconPath = token.logoURI || scom_token_list_2.assets.tokenPath(token, this.chainId);
+                const tokenIconPath = token.logoURI || scom_token_list_3.assets.tokenPath(token, this.chainId);
                 this.btnToken.caption = `<i-hstack verticalAlignment="center" gap="0.5rem">
           <i-panel>
-            <i-image width=${24} height=${24} url="${tokenIconPath}" fallbackUrl="${scom_token_list_2.assets.fallbackUrl}"></i-image>
+            <i-image width=${24} height=${24} url="${tokenIconPath}" fallbackUrl="${scom_token_list_3.assets.fallbackUrl}"></i-image>
           </i-panel>
           <i-label caption="${token?.symbol || ''}"></i-label>
         </i-hstack>`;
@@ -773,6 +808,8 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             }
         }
         async onSelectFn(token) {
+            if (JSON.stringify(this._token) === JSON.stringify(token))
+                return;
             if (this.onChanged) {
                 this.onChanged(token);
             }
@@ -820,6 +857,9 @@ define("@scom/scom-token-input", ["require", "exports", "@ijstech/components", "
             const supportValidAddress = this.getAttribute('supportValidAddress', true);
             if (supportValidAddress != null)
                 this.supportValidAddress = supportValidAddress;
+            const isCustomTokenShown = this.getAttribute('isCustomTokenShown', true);
+            if (isCustomTokenShown != null)
+                this.isCustomTokenShown = isCustomTokenShown;
             const value = this.getAttribute('value', true);
             if (value !== undefined)
                 this.value = value;

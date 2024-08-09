@@ -1,6 +1,16 @@
 import { FormatUtils } from "@ijstech/components";
 import { BigNumber, Wallet } from "@ijstech/eth-wallet";
-import { ITokenObject } from "@scom/scom-token-list";
+import { assets, ITokenObject } from "@scom/scom-token-list";
+
+const CUSTOM_TOKEN_VALUE = 'Other Token';
+
+export const CUSTOM_TOKEN = {
+  address: CUSTOM_TOKEN_VALUE,
+  name: CUSTOM_TOKEN_VALUE,
+  symbol: CUSTOM_TOKEN_VALUE,
+  decimals: 0,
+  logoURI: assets.fallbackUrl
+}
 
 export const formatNumber = (value: number | string | BigNumber, decimals?: number) => {
   const minValue = '0.0000001';

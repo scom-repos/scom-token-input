@@ -17,11 +17,12 @@ import {
 import { BigNumber, nullAddress } from '@ijstech/eth-contract'
 import customStyle, { buttonStyle } from './index.css'
 import { IType } from './global/index'
-import { formatNumber, getTokenInfo } from './utils/index'
+import { CUSTOM_TOKEN, formatNumber, getTokenInfo } from './utils/index'
 import { ChainNativeTokenByChainId, tokenStore, assets, DefaultERC20Tokens, ITokenObject } from '@scom/scom-token-list'
 import { TokenSelect } from './tokenSelect'
 import ScomTokenModal from '@scom/scom-token-modal'
 import { Wallet } from '@ijstech/eth-wallet'
+export { CUSTOM_TOKEN };
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -78,6 +79,7 @@ interface ScomTokenInputElement extends ControlElement {
   modalStyles?: IModalStyles;
   tokenButtonStyles?: IButtonStyles;
   supportValidAddress?: boolean;
+  isCustomTokenShown?: boolean;
   onInputAmountChanged?: (target: Control, event: Event) => void;
   onSelectToken?: (token: ITokenObject | undefined) => void;
   onSetMaxBalance?: () => void;
@@ -126,6 +128,7 @@ export default class ScomTokenInput extends Module {
   private _tokenButtonStyles: IButtonStyles;
   private tokenBalancesMap: any;
   private _supportValidAddress: boolean = false;
+  private _isCustomTokenShown: boolean = false;
   private _onSelectToken: (token: ITokenObject | undefined) => void;
   public onChanged: (token?: ITokenObject) => void;
   public onInputAmountChanged: (target: Control, event: Event) => void
@@ -290,7 +293,9 @@ export default class ScomTokenInput extends Module {
     }
     const tokenAddress = value.toLowerCase();
     let tokenObj = null;
-    if (tokenAddress.startsWith('0x') && tokenAddress !== nullAddress) {
+    if (tokenAddress === CUSTOM_TOKEN.address.toLowerCase()) {
+      tokenObj = CUSTOM_TOKEN;
+    } else if (tokenAddress.startsWith('0x') && tokenAddress !== nullAddress) {
       tokenObj = DefaultERC20Tokens[this.chainId]?.find(v => v.address?.toLowerCase() === tokenAddress);
     } else {
       const nativeToken = ChainNativeTokenByChainId[this.chainId];
@@ -406,6 +411,14 @@ export default class ScomTokenInput extends Module {
   set supportValidAddress(value: boolean) {
     this._supportValidAddress = value;
     if (this.cbToken) this.cbToken.supportValidAddress = value;
+  }
+
+  get isCustomTokenShown() {
+    return this._isCustomTokenShown;
+  }
+  set isCustomTokenShown(value: boolean) {
+    this._isCustomTokenShown = value;
+    if (this.cbToken) this.cbToken.isCustomTokenShown = value;
   }
 
   get amount(): string {
@@ -600,6 +613,7 @@ export default class ScomTokenInput extends Module {
   }
 
   private async onSelectFn(token: ITokenObject | undefined) {
+    if (JSON.stringify(this._token) === JSON.stringify(token)) return;
     if (this.onChanged) {
       this.onChanged(token)
     }
@@ -643,6 +657,8 @@ export default class ScomTokenInput extends Module {
     this.placeholder = this.getAttribute('placeholder', true);
     const supportValidAddress = this.getAttribute('supportValidAddress', true);
     if (supportValidAddress != null) this.supportValidAddress = supportValidAddress;
+    const isCustomTokenShown = this.getAttribute('isCustomTokenShown', true);
+    if (isCustomTokenShown != null) this.isCustomTokenShown = isCustomTokenShown;
     const value = this.getAttribute('value', true);
     if (value !== undefined) this.value = value;
     this.pnlTopSection.visible = this.isBalanceShown;

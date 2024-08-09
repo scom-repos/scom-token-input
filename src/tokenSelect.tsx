@@ -10,13 +10,12 @@ import {
   Input,
   Styles
 } from '@ijstech/components'
-import { Wallet } from '@ijstech/eth-wallet';
 import { assets, ITokenObject } from '@scom/scom-token-list';
 import customStyle, {
   tokenStyle,
   scrollbarStyle
 } from './tokenSelect.css'
-import { getTokenInfo } from './utils';
+import { CUSTOM_TOKEN, getTokenInfo } from './utils';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -44,6 +43,7 @@ export class TokenSelect extends Module {
   private currentToken: string = ''
   private filterValue: string = '';
   private _supportValidAddress: boolean = false;
+  private _isCustomTokenShown: boolean = false;
 
   private mdCbToken: Modal
   private edtSearch: Input;
@@ -86,6 +86,13 @@ export class TokenSelect extends Module {
   }
   set supportValidAddress(value: boolean) {
     this._supportValidAddress = value;
+  }
+
+  get isCustomTokenShown() {
+    return this._isCustomTokenShown;
+  }
+  set isCustomTokenShown(value: boolean) {
+    this._isCustomTokenShown = value;
   }
 
   private get tokenDataListFiltered(): ITokenObject[] {
@@ -162,6 +169,13 @@ export class TokenSelect extends Module {
         tokenList.push(token);
       }
     }
+    if (this.supportValidAddress && this.isCustomTokenShown) {
+      tokenList.push({
+        chainId: this.chainId,
+        ...CUSTOM_TOKEN
+      });
+    }
+
     if (tokenList.length) {
       const tokenItems = tokenList.map((token: ITokenObject) =>
         this.renderToken(token)

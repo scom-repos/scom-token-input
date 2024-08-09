@@ -12,6 +12,13 @@ declare module "@scom/scom-token-input/global/index.ts" {
 declare module "@scom/scom-token-input/utils/index.ts" {
     import { BigNumber } from "@ijstech/eth-wallet";
     import { ITokenObject } from "@scom/scom-token-list";
+    export const CUSTOM_TOKEN: {
+        address: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+        logoURI: string;
+    };
     export const formatNumber: (value: number | string | BigNumber, decimals?: number) => string;
     export const getTokenInfo: (address: string, chainId: number) => Promise<ITokenObject>;
 }
@@ -47,6 +54,7 @@ declare module "@scom/scom-token-input/tokenSelect.tsx" {
         private currentToken;
         private filterValue;
         private _supportValidAddress;
+        private _isCustomTokenShown;
         private mdCbToken;
         private edtSearch;
         private gridTokenList;
@@ -62,6 +70,8 @@ declare module "@scom/scom-token-input/tokenSelect.tsx" {
         set chainId(value: number | undefined);
         get supportValidAddress(): boolean;
         set supportValidAddress(value: boolean);
+        get isCustomTokenShown(): boolean;
+        set isCustomTokenShown(value: boolean);
         private get tokenDataListFiltered();
         private renderToken;
         private clearTokenList;
@@ -80,7 +90,9 @@ declare module "@scom/scom-token-input/tokenSelect.tsx" {
 declare module "@scom/scom-token-input" {
     import { ControlElement, Module, Container, Control } from '@ijstech/components';
     import { IType } from "@scom/scom-token-input/global/index.ts";
+    import { CUSTOM_TOKEN } from "@scom/scom-token-input/utils/index.ts";
     import { ITokenObject } from '@scom/scom-token-list';
+    export { CUSTOM_TOKEN };
     interface IModalStyles {
         maxWidth?: number | string;
         minWidth?: number | string;
@@ -117,6 +129,7 @@ declare module "@scom/scom-token-input" {
         modalStyles?: IModalStyles;
         tokenButtonStyles?: IButtonStyles;
         supportValidAddress?: boolean;
+        isCustomTokenShown?: boolean;
         onInputAmountChanged?: (target: Control, event: Event) => void;
         onSelectToken?: (token: ITokenObject | undefined) => void;
         onSetMaxBalance?: () => void;
@@ -160,6 +173,7 @@ declare module "@scom/scom-token-input" {
         private _tokenButtonStyles;
         private tokenBalancesMap;
         private _supportValidAddress;
+        private _isCustomTokenShown;
         private _onSelectToken;
         onChanged: (token?: ITokenObject) => void;
         onInputAmountChanged: (target: Control, event: Event) => void;
@@ -203,6 +217,8 @@ declare module "@scom/scom-token-input" {
         set isBalanceShown(value: boolean);
         get supportValidAddress(): boolean;
         set supportValidAddress(value: boolean);
+        get isCustomTokenShown(): boolean;
+        set isCustomTokenShown(value: boolean);
         get amount(): string;
         get placeholder(): string;
         set placeholder(value: string);
